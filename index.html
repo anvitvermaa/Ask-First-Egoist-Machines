@@ -1,0 +1,2491 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="utf-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>ASK FIRST — Creative Pass for AI Passport</title>
+
+<meta name="description" content="Use-time, per-use-type, revocable consent for AI use of a creator's work, voice and likeness. A Creative Pass prototype built on Egoist AI Passport.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='5' fill='%230B0B0C'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-family='Helvetica Neue%2C Arial%2C sans-serif' font-weight='800' font-size='13' letter-spacing='-0.5' fill='%23D6206E'%3EAF%3C/text%3E%3C/svg%3E">
+
+<style>
+
+  :root{
+
+    --ink:#0B0B0C; --ink-2:#1C1B1A; --paper:#F5F3EE; --paper-2:#EDEAE3; --paper-3:#E4E0D7;
+
+    --line:#DCD8CE; --line-2:#C3BEB1; --mute:#6E695E; --mute-2:#8C8678;
+
+    --allow:#0F6B3E; --allow-bg:#E2EFE7; --deny:#A81B2E; --deny-bg:#F6E3E5;
+
+    --ask:#8A5A00; --ask-bg:#F7EDD8; --magenta:#D6206E;
+
+    --mono: ui-monospace,"SF Mono","SFMono-Regular",Menlo,Consolas,"Liberation Mono",monospace;
+
+    --sans:"Helvetica Neue",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+
+    --sh:0 1px 2px rgba(11,11,12,.04),0 8px 24px rgba(11,11,12,.05);
+
+  }
+
+  *{box-sizing:border-box}
+
+  html{scroll-behavior:smooth;overflow-x:hidden;max-width:100%}
+
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden;max-width:100%}
+
+  .wrap{max-width:1420px;margin:0 auto;padding:0 24px}
+
+  @media(max-width:640px){.wrap{padding:0 16px}}
+
+ 
+
+  /* ============ reveal ============ */
+
+  .rv{opacity:0;transform:translateY(14px);transition:opacity .6s cubic-bezier(.2,.7,.3,1),transform .6s cubic-bezier(.2,.7,.3,1)}
+
+  .rv.in{opacity:1;transform:none}
+
+ 
+
+  /* ============ nav ============ */
+
+  nav.bar{position:sticky;top:0;z-index:60;background:rgba(245,243,238,.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+
+  .bar .in{max-width:1420px;margin:0 auto;padding:11px 24px;display:flex;align-items:center;gap:20px}
+
+  .mark{font-weight:800;letter-spacing:-.035em;font-size:27px;text-transform:uppercase;white-space:nowrap;line-height:1}
+
+  .mark em{font-style:normal;color:var(--magenta)}
+
+  .navlinks{display:flex;gap:18px;margin-left:14px}
+
+  @media(max-width:640px){.mark{font-size:22px}}
+
+  .navlinks a{font-family:var(--mono);font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--mute);text-decoration:none;padding:4px 0;border-bottom:1.5px solid transparent}
+
+  .navlinks a:hover{color:var(--ink);border-color:var(--magenta)}
+
+  .bar .sp{flex:1}
+
+  .navtag{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--mute);border:1px solid var(--line-2);padding:4px 8px;border-radius:2px;white-space:nowrap}
+
+  @media(max-width:860px){.navlinks{display:none}}
+
+  @media(max-width:520px){.navtag{display:none}}
+
+ 
+
+  /* ============ buttons ============ */
+
+  .btn{font-family:var(--mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;border:1.5px solid var(--ink);background:#fff;color:var(--ink);padding:9px 14px;cursor:pointer;border-radius:2px;font-weight:600;transition:all .14s ease;white-space:nowrap}
+
+  .btn:hover{background:var(--ink);color:var(--paper)}
+
+  .btn:active{transform:translateY(1px)}
+
+  .btn.solid{background:var(--magenta);border-color:var(--magenta);color:#fff}
+
+  .btn.solid:hover{background:#AC1458;border-color:#AC1458}
+
+  .btn.big{font-size:12.5px;padding:14px 24px;letter-spacing:.11em}
+
+  .btn.ghost{background:transparent;color:var(--paper);border-color:rgba(245,243,238,.45)}
+
+  .btn.ghost:hover{background:var(--paper);color:var(--ink);border-color:var(--paper)}
+
+  .btn.danger{border-color:var(--deny);color:var(--deny)}
+
+  .btn.danger:hover{background:var(--deny);color:#fff}
+
+  .btn.tiny{padding:4px 8px;font-size:9.5px}
+
+  .btn[disabled]{opacity:.35;cursor:not-allowed;pointer-events:none}
+
+ 
+
+  /* ============ hero ============ */
+
+  .hero{padding:34px 0 54px;border-bottom:1px solid var(--line);position:relative;overflow:hidden}
+
+  .hero .eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--magenta);margin-bottom:14px;font-weight:600}
+
+  @media(max-width:640px){.hero{padding:24px 0 40px}}
+
+  .hero h1{font-size:clamp(34px,7.4vw,92px);line-height:.94;letter-spacing:-.042em;margin:0 0 26px;font-weight:800;text-transform:uppercase;max-width:15ch;overflow-wrap:break-word}
+
+  .hero h1 span{color:var(--magenta)}
+
+  .hero .sub{font-size:clamp(15px,1.7vw,19px);max-width:58ch;color:var(--ink-2);line-height:1.5;margin:0 0 30px}
+
+  .hero .sub b{font-weight:700}
+
+  .cta{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+
+  .cta .note{font-family:var(--mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--mute-2)}
+
+  .heroglow{position:absolute;right:-140px;top:-90px;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(214,32,110,.10),transparent 66%);pointer-events:none}
+
+  .heroglow2{position:absolute;right:60px;bottom:-220px;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(46,43,240,.07),transparent 66%);pointer-events:none}
+
+ 
+
+  /* ============ section frame ============ */
+
+  section.blk{padding:64px 0;border-bottom:1px solid var(--line)}
+
+  .shead{display:flex;align-items:baseline;gap:16px;margin-bottom:8px;flex-wrap:wrap}
+
+  .snum{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--magenta);font-weight:700}
+
+  .shead h2{font-size:clamp(23px,2.9vw,36px);line-height:1.06;letter-spacing:-.03em;margin:0;font-weight:800;text-transform:uppercase}
+
+  .sdek{font-size:15px;color:var(--ink-2);max-width:66ch;margin:0 0 34px;line-height:1.55}
+
+  .sdek b{font-weight:700}
+
+ 
+
+  /* ============ problem cards ============ */
+
+  .why{display:grid;grid-template-columns:repeat(5,1fr);gap:0}
+
+  @media(max-width:1100px){.why{grid-template-columns:repeat(2,1fr)}}
+
+  @media(max-width:620px){.why{grid-template-columns:1fr}}
+
+  .wcard{padding:22px 20px;border:1px solid var(--line-2);margin-right:-1px;background:#fff;transition:background .3s,transform .3s}
+
+  @media(max-width:1100px){.wcard{margin-right:-1px;margin-bottom:-1px}}
+
+  .wcard:hover{background:var(--paper-2);transform:translateY(-2px);z-index:2;position:relative}
+
+  .wcard .wn{font-family:var(--mono);font-size:26px;font-weight:800;color:var(--magenta);letter-spacing:-.04em;line-height:1;margin-bottom:12px;opacity:.85}
+
+  .wcard .wt{font-size:14.5px;font-weight:800;letter-spacing:-.015em;line-height:1.25;margin-bottom:9px}
+
+  .wcard .wd{font-size:12.3px;line-height:1.58;color:var(--mute)}
+
+  .wcard .wd b{color:var(--ink-2);font-weight:700}
+
+  .punch{margin-top:26px;padding:20px 22px;background:var(--ink);color:var(--paper);font-size:clamp(16px,2.1vw,23px);
+
+         font-weight:700;letter-spacing:-.02em;line-height:1.32;text-align:center}
+
+  .punch span{color:#FF8FC0}
+
+ 
+
+  /* ============ who band ============ */
+
+  .who{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:38px}
+
+  @media(max-width:900px){.who{grid-template-columns:1fr}}
+
+  .wbox{border-left:3px solid var(--magenta);padding:4px 0 4px 16px}
+
+  .wbox h4{font-family:var(--mono);font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--mute);margin:0 0 6px}
+
+  .wbox .wh{font-size:16px;font-weight:800;letter-spacing:-.02em;margin-bottom:7px}
+
+  .wbox p{font-size:12.5px;line-height:1.58;color:var(--ink-2);margin:0}
+
+  .wbox p b{font-weight:700}
+
+ 
+
+  /* ============ comparison ============ */
+
+  .vs{display:grid;grid-template-columns:1fr 1.35fr;gap:22px;align-items:stretch}
+
+  @media(max-width:900px){.vs{grid-template-columns:1fr}}
+
+  .vcard{border:1px solid var(--line-2);background:#fff;padding:20px;display:flex;flex-direction:column;box-shadow:var(--sh)}
+
+  .vcard.now{background:var(--paper-2);border-style:dashed}
+
+  .vhead{border-bottom:2px solid var(--ink);padding-bottom:12px;margin-bottom:16px}
+
+  .vcard.now .vhead{border-bottom-color:var(--line-2)}
+
+  .vkick{font-family:var(--mono);font-size:9.5px;letter-spacing:.19em;text-transform:uppercase;color:var(--mute);margin-bottom:7px}
+
+  .vbig{font-size:clamp(26px,3.2vw,40px);font-weight:800;letter-spacing:-.035em;line-height:.97;text-transform:uppercase}
+
+  .vcard.now .vbig{color:var(--mute-2)}
+
+  .vcard:not(.now) .vbig span{color:var(--magenta)}
+
+  .vsub{font-size:13px;color:var(--mute);margin-top:7px;line-height:1.4}
+
+  .vcard .vcap{margin-top:auto;padding-top:14px;font-size:12px;color:var(--mute);line-height:1.5;border-top:1px solid var(--line)}
+
+  .vcard .vcap b{color:var(--ink);font-weight:700}
+
+  .robots{font-family:var(--mono);font-size:12px;background:var(--ink);color:#E8E5DE;padding:13px 15px;line-height:1.7;margin-bottom:16px}
+
+  .robots .dim{color:#7A756B}
+
+  .onebit{display:flex;align-items:center;gap:12px;justify-content:center;padding:14px 0}
+
+  .swx{width:74px;height:34px;border-radius:18px;background:var(--deny);position:relative;transition:background .5s}
+
+  .swx:after{content:"";position:absolute;top:3px;left:3px;width:28px;height:28px;border-radius:50%;background:#fff;transition:transform .5s cubic-bezier(.5,0,.2,1)}
+
+  .swx.on{background:var(--allow)} .swx.on:after{transform:translateX(40px)}
+
+  .swlab{font-family:var(--mono);font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mute);width:52px}
+
+ 
+
+  .askedby{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--magenta);
+
+           text-align:right;margin-bottom:5px;font-weight:700}
+
+  .gridwrap{padding-bottom:4px}
+
+  table.matrix{border-collapse:separate;border-spacing:4px;font-size:11px;width:100%;table-layout:fixed}
+
+  table.matrix th.hd{font-weight:700;color:var(--ink);letter-spacing:.01em;font-size:10.5px;padding:0 2px 6px;
+
+                     text-align:center;line-height:1.2;vertical-align:bottom}
+
+  table.matrix th.hd small{display:block;font-weight:400;color:var(--mute);font-size:9px;letter-spacing:.02em}
+
+  table.matrix th.corner{width:38%}
+
+  table.matrix th.rw{text-align:right;padding-right:9px;font-size:11.5px;color:var(--ink);font-weight:600;white-space:nowrap}
+
+  table.matrix tr.grp-row th{text-align:left;padding:9px 0 3px;font-family:var(--mono);font-size:8.5px;
+
+                             letter-spacing:.17em;text-transform:uppercase;color:var(--mute);font-weight:700;border-bottom:1px solid var(--line)}
+
+  table.matrix td{height:26px;border-radius:3px;text-align:center;color:#fff;font-size:9.5px;letter-spacing:.05em;
+
+                  font-weight:700;opacity:0;transform:scale(.7);transition:opacity .3s,transform .3s;cursor:default}
+
+  table.matrix td.show{opacity:1;transform:none}
+
+  td.m-allow{background:var(--allow)} td.m-deny{background:var(--deny)} td.m-ask{background:var(--ask)}
+
+  .legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:15px;padding-top:13px;border-top:1px solid var(--line)}
+
+  .legend div{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--mute);line-height:1.3}
+
+  .legend b{display:inline-flex;align-items:center;justify-content:center;min-width:36px;height:20px;border-radius:3px;
+
+            color:#fff;font-size:9.5px;font-weight:700;letter-spacing:.05em;flex:0 0 auto}
+
+  @media(max-width:520px){
+
+    table.matrix th.hd{font-size:9px} table.matrix th.hd small{display:none}
+
+    table.matrix th.rw{font-size:10px;white-space:normal} table.matrix th.corner{width:34%}
+
+  }
+
+ 
+
+  /* ============ loop diagram ============ */
+
+  .loop{display:grid;grid-template-columns:repeat(5,1fr);gap:0;margin-top:6px}
+
+  @media(max-width:940px){.loop{grid-template-columns:1fr;gap:8px}}
+
+  .lstep{position:relative;padding:18px 16px;border:1px solid var(--line-2);background:#fff;margin-right:-1px;transition:all .3s ease}
+
+  @media(max-width:940px){.lstep{margin-right:0;margin-bottom:-1px}}
+
+  .lstep.hot{background:var(--ink);border-color:var(--ink);color:var(--paper);z-index:2;transform:translateY(-3px);box-shadow:0 10px 26px rgba(11,11,12,.16)}
+
+  .lstep .ln{font-family:var(--mono);font-size:9px;letter-spacing:.16em;color:var(--magenta);font-weight:700;margin-bottom:7px}
+
+  .lstep.hot .ln{color:#FF8FC0}
+
+  .lstep .lt{font-size:13.5px;font-weight:700;letter-spacing:-.01em;margin-bottom:5px}
+
+  .lstep .ld{font-size:11.5px;line-height:1.45;color:var(--mute)}
+
+  .lstep.hot .ld{color:rgba(245,243,238,.72)}
+
+  .lstep:after{content:"";position:absolute;right:-6px;top:50%;transform:translateY(-50%) rotate(45deg);width:9px;height:9px;border-top:1px solid var(--line-2);border-right:1px solid var(--line-2);background:var(--paper);z-index:3}
+
+  .lstep:last-child:after{display:none}
+
+  @media(max-width:940px){.lstep:after{display:none}}
+
+ 
+
+  /* ============ console ============ */
+
+  .consolehead{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:20px}
+
+  /* minmax(0,1fr) is load-bearing: a plain 1fr track defaults to min-width:auto,
+
+     so the long JSON lines in the resolver would force the grid wider than the
+
+     viewport and produce a horizontal scrollbar. */
+
+  .cols{display:grid;grid-template-columns:330px minmax(0,1fr) 350px;gap:18px;align-items:start;max-width:100%}
+
+  .cols > *{min-width:0}
+
+  @media(max-width:1300px){.cols{grid-template-columns:300px minmax(0,1fr)}}
+
+  @media(max-width:920px){.cols{grid-template-columns:minmax(0,1fr)}}
+
+ 
+
+  .panel{border:1px solid var(--line-2);background:#fff;box-shadow:var(--sh);position:relative;min-width:0;max-width:100%;
+
+         transition:box-shadow .4s cubic-bezier(.2,.7,.3,1),border-color .3s ease,transform .45s cubic-bezier(.2,.7,.3,1),opacity .35s ease,filter .35s ease}
+
+  .panel.spot{border-color:var(--magenta);box-shadow:0 0 0 3px rgba(214,32,110,.14),0 14px 34px rgba(11,11,12,.11);transform:translateY(-2px);z-index:4}
+
+  /* Zoom lifts the panel and recedes the others, so the eye is already in the
+
+     right place before the state changes. Deliberately NO scale(): scaling a grid
+
+     child overflows its track and pushes the neighbouring column off-screen. */
+
+  .panel.zoom{border-color:var(--magenta);transform:translateY(-6px);z-index:6;
+
+              box-shadow:0 0 0 3px var(--magenta),0 26px 60px rgba(11,11,12,.22)}
+
+  .cols.dim .panel:not(.zoom){opacity:.3;filter:saturate(.3)}
+
+  .cols.dim .panel.zoom{background:#fff}
+
+  .panel > h2{margin:0;padding:11px 14px;border-bottom:1px solid var(--line-2);font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--paper-2)}
+
+  .panel > h2 .n{color:var(--mute);font-weight:400;text-transform:none;letter-spacing:.05em;font-size:9.5px}
+
+  .pad{padding:14px;min-width:0;max-width:100%}
+
+  /* nothing anywhere is allowed to force a sideways scrollbar: long mono
+
+     identifiers wrap instead of pushing their container wider */
+
+  .pad *,.card *{min-width:0}
+
+  .lease .lid,.lease .lu,.rcpt .rm,.rcpt .rt,.offer .ot{overflow-wrap:anywhere;word-break:break-word}
+
+  .card .meta{flex-wrap:wrap}
+
+  .hint{font-size:11.5px;color:var(--mute);line-height:1.52}
+
+  .hint b{color:var(--ink-2)}
+
+  .hint code{font-family:var(--mono);font-size:10.5px;background:var(--paper-2);padding:1px 4px}
+
+ 
+
+  .card{background:linear-gradient(150deg,#111 0%,#241C3A 45%,#4A1338 100%);color:#F5F3EE;padding:16px;position:relative;overflow:hidden}
+
+  .card:after{content:"";position:absolute;right:-42px;top:-42px;width:150px;height:150px;border:1px solid rgba(245,243,238,.16);border-radius:50%}
+
+  .card:before{content:"";position:absolute;right:-14px;bottom:-64px;width:150px;height:150px;border:1px solid rgba(245,243,238,.1);border-radius:50%}
+
+  .card .cap{font-family:var(--mono);font-size:9px;letter-spacing:.22em;text-transform:uppercase;opacity:.6}
+
+  .card .nm{font-size:22px;font-weight:800;letter-spacing:-.02em;margin:5px 0 1px;text-transform:uppercase}
+
+  .card .hd{font-family:var(--mono);font-size:11px;opacity:.78}
+
+  .card .bio{font-size:11.5px;opacity:.72;margin-top:9px;max-width:36ch;line-height:1.45}
+
+  .card .meta{display:flex;gap:14px;row-gap:9px;margin-top:12px;padding-top:10px;border-top:1px solid rgba(245,243,238,.18);font-family:var(--mono);font-size:9.5px}
+
+  .card .meta div span{display:block;opacity:.55;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase}
+
+ 
+
+  .grp{border-top:1px solid var(--line);padding:10px 14px 4px}
+
+  .grp:first-of-type{border-top:none}
+
+  .grp > .gh{font-family:var(--mono);font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--mute);margin-bottom:8px;display:flex;justify-content:space-between;gap:8px}
+
+  .row{padding:8px 0;border-bottom:1px dotted var(--line);border-radius:3px;transition:background .3s}
+
+  .grp .row:last-child{border-bottom:none}
+
+  .row.pulse{background:#FFF6C2}
+
+  .row .r1{display:flex;align-items:center;justify-content:space-between;gap:8px}
+
+  .row .ut{font-family:var(--mono);font-size:11.5px;font-weight:600}
+
+  .row .ut .pn{font-family:var(--sans);font-weight:400;color:var(--mute);font-size:10.5px;margin-left:4px}
+
+  .row .ut .prot{font-size:7.5px;letter-spacing:.1em;background:var(--ink);color:var(--paper);padding:1px 4px;border-radius:2px;margin-left:5px;vertical-align:1px}
+
+  .row .desc{font-size:10.5px;color:var(--mute);margin-top:2px;line-height:1.4}
+
+  .seg{display:flex;border:1px solid var(--line-2);border-radius:2px;overflow:hidden;flex:0 0 auto}
+
+  .seg button{font-family:var(--mono);font-size:9px;letter-spacing:.05em;text-transform:uppercase;border:0;background:#fff;color:var(--mute);padding:5px 8px;cursor:pointer;border-right:1px solid var(--line-2);transition:background .15s}
+
+  .seg button:last-child{border-right:0}
+
+  .seg button:hover{background:var(--paper-2)}
+
+  .seg button.on[data-v="allow"]{background:var(--allow);color:#fff}
+
+  .seg button.on[data-v="ask"]{background:var(--ask);color:#fff}
+
+  .seg button.on[data-v="deny"]{background:var(--deny);color:#fff}
+
+  .conds{display:flex;gap:10px;margin-top:6px;flex-wrap:wrap;align-items:center}
+
+  .chk{display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9.5px;color:var(--mute);cursor:pointer;text-transform:uppercase;letter-spacing:.04em}
+
+  .chk input{margin:0;width:12px;height:12px;accent-color:var(--ink)}
+
+  .classes{display:flex;gap:3px;align-items:center;margin-left:auto}
+
+  .classes .cl{font-family:var(--mono);font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--line-2);background:#fff;color:var(--line-2);padding:3px 5px;cursor:pointer;border-radius:2px;font-weight:700;transition:all .15s}
+
+  .classes .cl:hover{border-color:var(--mute)}
+
+  .classes .cl.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+  .classes .lbl{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;color:var(--mute);text-transform:uppercase;margin-right:2px}
+
+ 
+
+  .ctrls{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}
+
+  @media(max-width:420px){.ctrls{grid-template-columns:1fr}}
+
+  .fld label{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--mute);margin-bottom:5px}
+
+  select,input[type=text]{width:100%;font-family:var(--mono);font-size:12px;padding:8px;border:1px solid var(--line-2);background:#fff;color:var(--ink);border-radius:2px}
+
+  select:focus,input:focus{outline:2px solid var(--magenta);outline-offset:-1px}
+
+  .decision{margin-top:14px;border:1.5px solid var(--line-2);overflow:hidden;border-radius:2px}
+
+  .decision .dh{padding:14px 15px;display:flex;align-items:center;gap:14px;justify-content:space-between;flex-wrap:wrap}
+
+  .verdict{font-size:27px;font-weight:800;letter-spacing:-.02em;text-transform:uppercase;line-height:1}
+
+  .because{font-size:12px;max-width:54ch;line-height:1.48}
+
+  .d-allow{background:var(--allow-bg);border-color:var(--allow)} .d-allow .verdict{color:var(--allow)}
+
+  .d-deny{background:var(--deny-bg);border-color:var(--deny)} .d-deny .verdict{color:var(--deny)}
+
+  .d-ask{background:var(--ask-bg);border-color:var(--ask)} .d-ask .verdict{color:var(--ask)}
+
+  .d-idle{background:var(--paper-2)} .d-idle .verdict{color:var(--mute);font-size:15px;letter-spacing:.1em;font-family:var(--mono);font-weight:600}
+
+  /* wrap rather than scroll — every long value stays readable without the reader
+
+     having to drag a horizontal bar inside a panel */
+
+  pre.json{margin:0;padding:13px 15px;background:var(--ink);color:#E8E5DE;font-family:var(--mono);font-size:11px;
+
+           line-height:1.62;border-top:1.5px solid var(--line-2);
+
+           white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;max-width:100%}
+
+  pre.json .k{color:#8FB8FF} pre.json .s{color:#FFC98F} pre.json .n{color:#B6F0A0} pre.json .c{color:#7A756B;font-style:italic}
+
+ 
+
+  .lease{border:1px solid var(--line-2);padding:10px 12px;margin-bottom:8px;background:#fff;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border-radius:2px;animation:pop .3s ease}
+
+  @keyframes pop{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
+
+  .lease.dead{opacity:.5;background:var(--paper-2)}
+
+  .lease .lid{font-family:var(--mono);font-size:10.5px;font-weight:600}
+
+  .lease .lu{font-size:10.5px;color:var(--mute);margin-top:2px;font-family:var(--mono)}
+
+  .ttl{font-family:var(--mono);font-size:15px;font-weight:700}
+
+  .ttl.warn{color:var(--deny)}
+
+  .ttl small{font-size:9px;letter-spacing:.1em;color:var(--mute);display:block;text-transform:uppercase;font-weight:400}
+
+ 
+
+  .rcpt{border-bottom:1px solid var(--line);padding:9px 0;font-size:11.5px;display:flex;gap:9px;align-items:flex-start;animation:pop .3s ease}
+
+  .rcpt:last-child{border-bottom:none}
+
+  .pill{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;padding:2px 5px;border-radius:2px;font-weight:700;flex:0 0 auto;margin-top:1px}
+
+  .p-allow{background:var(--allow-bg);color:var(--allow)} .p-deny{background:var(--deny-bg);color:var(--deny)}
+
+  .p-ask{background:var(--ask-bg);color:var(--ask)} .p-rev{background:var(--paper-3);color:#3B382F}
+
+  .rcpt .rb{flex:1;min-width:0}
+
+  .rcpt .rt{font-family:var(--mono);font-size:9.5px;color:var(--mute)}
+
+  .rcpt .rm{margin-top:1px;line-height:1.42} .rcpt .rm b{font-weight:700}
+
+ 
+
+  .offer{border:1px solid var(--magenta);background:#FDF0F6;padding:11px 12px;margin-bottom:8px;border-radius:2px;animation:pop .3s ease}
+
+  .offer .ot{font-size:12px;line-height:1.45} .offer .ot b{font-weight:700}
+
+  .offer .oa{display:flex;gap:6px;margin-top:9px;align-items:center;flex-wrap:wrap}
+
+  .offer input{width:106px;font-family:var(--mono);font-size:11px;padding:5px 6px;border:1px solid var(--line-2)}
+
+  .empty{font-size:11.5px;color:var(--mute);font-style:italic;padding:7px 0}
+
+  .killrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+
+ 
+
+  /* ============ demo driver ============ */
+
+  .driver{border:1.5px solid var(--ink);background:var(--ink);color:var(--paper);display:flex;align-items:center;gap:16px;padding:13px 16px;flex-wrap:wrap;border-radius:2px}
+
+  .driver.live{position:fixed;left:24px;right:24px;bottom:18px;z-index:80;box-shadow:0 16px 44px rgba(11,11,12,.34);animation:rise .35s cubic-bezier(.2,.7,.3,1)}
+
+  @keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+
+  @media(max-width:640px){.driver.live{left:10px;right:10px;bottom:10px;padding:11px 12px;gap:10px}}
+
+  .driver .lbl{font-family:var(--mono);font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;opacity:.6;white-space:nowrap}
+
+  .driver .step{font-size:13.5px;flex:1;min-width:230px;line-height:1.45}
+
+  .driver .step b{color:#FF8FC0}
+
+  .driver .step i{color:#FFD9E8;font-style:normal}
+
+  .dots{display:flex;gap:5px;align-items:center}
+
+  .dots i{width:6px;height:6px;border-radius:50%;background:rgba(245,243,238,.28);transition:all .3s}
+
+  .dots i.on{background:var(--magenta);transform:scale(1.45)}
+
+  .dots i.done{background:rgba(245,243,238,.62)}
+
+  @media(max-width:640px){.dots{display:none}}
+
+ 
+
+  /* ============ closing cards ============ */
+
+  .cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+
+  @media(max-width:940px){.cards3{grid-template-columns:1fr}}
+
+  .ncard{border:1px solid var(--line-2);background:#fff;padding:22px;box-shadow:var(--sh)}
+
+  .ncard.dark{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+  .ncard h3{font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;margin:0 0 12px;color:var(--magenta);font-weight:700}
+
+  .ncard p{font-size:12.8px;line-height:1.62;margin:0 0 11px}
+
+  .ncard p:last-child{margin-bottom:0}
+
+  .ncard p b{font-weight:700}
+
+  .ncard.dark p{color:rgba(245,243,238,.82)} .ncard.dark p b{color:var(--paper)}
+
+  .ncard code{font-family:var(--mono);font-size:11px;background:var(--paper-2);padding:1px 4px}
+
+  .ncard.dark code{background:rgba(245,243,238,.13)}
+
+ 
+
+  footer{padding:32px 0 56px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--mute);text-transform:uppercase;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+
+  .spacer{height:76px}
+
+</style>
+
+</head>
+
+<body>
+
+ 
+
+<nav class="bar">
+
+  <div class="in">
+
+    <div class="mark">Ask <em>First</em></div>
+
+    <div class="navlinks">
+
+      <a href="#problem">The problem</a>
+
+      <a href="#gap">The gap</a>
+
+      <a href="#loop">How it works</a>
+
+      <a href="#console">Try it</a>
+
+      <a href="#honest">Limits</a>
+
+    </div>
+
+    <div class="sp"></div>
+
+    <div class="navtag">Creative · Build lane</div>
+
+    <button class="btn solid" id="navRun">Run demo</button>
+
+  </div>
+
+</nav>
+
+ 
+
+<!-- ================= HERO ================= -->
+
+<header class="hero">
+
+  <div class="heroglow"></div><div class="heroglow2"></div>
+
+  <div class="wrap">
+
+    <div class="eyebrow rv">Creative Pass · built on Egoist AI Passport</div>
+
+    <h1 class="rv">Consent should be <span>resolved</span>, not declared once.</h1>
+
+    <p class="sub rv">
+
+      Today a creator's only way to tell AI what it may do with their work is one switch in a text file —
+
+      read at crawl time, by whoever bothers, and impossible to take back.
+
+      <b>Ask First moves that answer onto the creator's AI Passport and makes systems fetch it at the moment they act.</b>
+
+    </p>
+
+    <div class="cta rv">
+
+      <button class="btn solid big" id="heroRun">▶ &nbsp;Run the guided demo</button>
+
+      <a href="#console" class="btn big">Explore it yourself</a>
+
+      <span class="note">90 seconds · nothing to install</span>
+
+    </div>
+
+  </div>
+
+</header>
+
+ 
+
+<!-- ================= WHY IT KEEPS HAPPENING ================= -->
+
+<section class="blk" id="problem">
+
+  <div class="wrap">
+
+    <div class="shead rv"><span class="snum">01</span><h2>Why creators keep getting used without consent, or payment</h2></div>
+
+    <p class="sdek rv">
+
+      It is tempting to read this as an ethics failure — companies behaving badly, creators too small to stop them.
+
+      That is not quite what is happening. <b>Creators are not losing this because they said yes.
+
+      They are losing it because there was never a way to be asked.</b> Five mechanisms are missing, and every one
+
+      of them makes taking cheaper than asking.
+
+    </p>
+
+ 
+
+    <div class="why rv">
+
+      <div class="wcard">
+
+        <div class="wn">01</div>
+
+        <div class="wt">There is nobody to ask</div>
+
+        <div class="wd">A company that genuinely wants permission has no address to send the question to and no way to
+
+        record the answer. <b>Consent is not being refused — it is unaskable.</b> So the scrupulous and the shameless
+
+        end up behaving identically, which is the clearest sign a mechanism is missing rather than a moral.</div>
+
+      </div>
+
+      <div class="wcard">
+
+        <div class="wn">02</div>
+
+        <div class="wt">Silence is read as yes</div>
+
+        <div class="wd">Absence of a signal is treated as permission. A photographer who has never heard of
+
+        <code>robots.txt</code> has, by default, agreed to everything. <b>The burden sits on the person with the
+
+        least power and the least warning</b> — and it is a burden that has to be renewed on every platform they post to.</div>
+
+      </div>
+
+      <div class="wcard">
+
+        <div class="wn">03</div>
+
+        <div class="wt">You find out years later</div>
+
+        <div class="wd">The work is taken once, quietly, at crawl time. The harm surfaces much later, in someone's
+
+        generated output. <b>By then there is no counterparty, no trail, and no moment at which a decision could
+
+        have been recorded</b> — so even a creator willing to fight has nothing to point at.</div>
+
+      </div>
+
+      <div class="wcard">
+
+        <div class="wn">04</div>
+
+        <div class="wt">Refusing costs you and teaches you nothing</div>
+
+        <div class="wd">Block everything and you lose discovery, which for most creators <em>is</em> the livelihood.
+
+        And a refusal is a dead end: you never learn who wanted you or what for. <b>Saying no destroys the deal
+
+        instead of starting the negotiation.</b></div>
+
+      </div>
+
+      <div class="wcard">
+
+        <div class="wn">05</div>
+
+        <div class="wt">There is no unit small enough to sell</div>
+
+        <div class="wd">Licensing works for the famous, through lawyers, over months. There is no per-use,
+
+        per-type, machine-speed unit — so a vendor licenses a handful of names and scrapes everyone else.
+
+        <b>That is not malice. It is arithmetic</b>, and it will not change until the small unit exists.</div>
+
+      </div>
+
+    </div>
+
+ 
+
+    <div class="punch rv">Every one of these is a missing <span>mechanism</span>, not a missing law.</div>
+
+ 
+
+    <div class="who rv">
+
+      <div class="wbox">
+
+        <h4>Who it is for</h4>
+
+        <div class="wh">Working creators</div>
+
+        <p>Musicians, illustrators, essayists, voice actors, photographers, performers — anyone whose recognisable
+
+        output is the asset. Crucially <b>they are not anti-AI</b>. They want indexing and citation, because that is
+
+        distribution. They refuse voice cloning, because that is impersonation. Today they cannot say both.</p>
+
+      </div>
+
+      <div class="wbox">
+
+        <h4>Who pays for it</h4>
+
+        <div class="wh">The AI vendors</div>
+
+        <p>Not the creators. Voice, likeness and generation platforms already cannot close enterprise deals without
+
+        consent provenance — agencies demand indemnification. <b>A vendor who can produce receipts can sell; one who
+
+        cannot, increasingly cannot.</b> Creators stay free, matching the Passport's free-for-life promise.</p>
+
+      </div>
+
+      <div class="wbox">
+
+        <h4>Is it only for creators?</h4>
+
+        <div class="wh">No — but that is where it should start</div>
+
+        <p>The primitive is general. <b>Use-time resolution, expiring leases and content-free receipts are the same
+
+        shape</b> whether what travels is a licence, a workplace credential, an agent's spending limit, or an
+
+        eligibility proof. We aimed it at creative rights because that is where the absence bites hardest today —
+
+        and because a mechanism should be proven somewhere specific before it is sold as a platform.</p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+ 
+
+<!-- ================= THE GAP ================= -->
+
+<section class="blk" id="gap">
+
+  <div class="wrap">
+
+    <div class="shead rv"><span class="snum">02</span><h2>One bit, versus the answer creators actually have</h2></div>
+
+    <p class="sdek rv">
+
+      A creator's honest position is <b>nine independent decisions</b>, and each one changes depending on who is asking.
+
+      Almost all of them want to be findable — that is distribution. Almost none want their voice cloned — that is
+
+      impersonation. <b>There is currently no way to say “find me, but do not become me.”</b>
+
+      Here is the whole vocabulary they have today, next to the one they should have.
+
+    </p>
+
+ 
+
+    <div class="vs rv">
+
+      <div class="vcard now">
+
+        <div class="vhead">
+
+          <div class="vkick">What a creator has today</div>
+
+          <div class="vbig">One answer,<br>for everyone,<br>forever</div>
+
+          <div class="vsub">robots.txt · ai.txt · a terms page nobody reads</div>
+
+        </div>
+
+        <div class="robots">User-agent: *<br>Disallow: /<br><span class="dim"># that's it. that's the whole vocabulary.</span></div>
+
+        <div class="onebit">
+
+          <span class="swlab">Deny</span>
+
+          <div class="swx" id="swx"></div>
+
+          <span class="swlab" style="text-align:right">Allow</span>
+
+        </div>
+
+        <div class="vcap"><b>One bit, and it is the wrong bit.</b> Read once, at crawl time, by whoever chooses to.
+
+        It cannot tell a university from an ad agency, cannot separate being indexed from being impersonated,
+
+        and cannot be taken back once read.</div>
+
+      </div>
+
+ 
+
+      <div class="vcard">
+
+        <div class="vhead">
+
+          <div class="vkick">What a creator has with</div>
+
+          <div class="vbig">Ask <span>First</span></div>
+
+          <div class="vsub">A different answer for each thing you might do, and each kind of person who might ask.</div>
+
+        </div>
+
+        <div class="askedby">↓ who is asking →</div>
+
+        <div class="gridwrap"><table class="matrix" id="matrix"></table></div>
+
+        <div class="legend">
+
+          <div><b class="m-allow" style="background:var(--allow)">yes</b> allowed automatically</div>
+
+          <div><b class="m-ask" style="background:var(--ask)">ask</b> comes to me to decide</div>
+
+          <div><b class="m-deny" style="background:var(--deny)">no</b> refused, and I still see they asked</div>
+
+        </div>
+
+        <div class="vcap"><b>36 positions, each set independently and each revocable on its own.</b>
+
+        Read at the moment of use — so changing one square changes the answer everywhere, including on copies
+
+        already in circulation. This grid is live: edit the policy in the console below and watch it move.</div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+ 
+
+<!-- ================= LOOP ================= -->
+
+<section class="blk" id="loop">
+
+  <div class="wrap">
+
+    <div class="shead rv"><span class="snum">03</span><h2>The loop</h2></div>
+
+    <p class="sdek rv">
+
+      The published work carries only a <b>pointer</b> to the creator's Passport — never the permission itself.
+
+      That single design choice is what makes withdrawal mean something: there is no stale copy of the answer
+
+      anywhere to go out of date. <span style="color:var(--magenta);font-weight:600">These steps light up as the demo runs.</span>
+
+    </p>
+
+    <div class="loop rv">
+
+      <div class="lstep" data-loop="0"><div class="ln">01</div><div class="lt">Work carries a pointer</div><div class="ld">Not a licence. <code>ego:junokade</code> — inert, and useless on its own.</div></div>
+
+      <div class="lstep" data-loop="1"><div class="ln">02</div><div class="lt">Requester resolves</div><div class="ld">At the moment of use. Identity comes from a credential, never self-declared.</div></div>
+
+      <div class="lstep" data-loop="2"><div class="ln">03</div><div class="lt">Policy decides</div><div class="ld">Allow, ask, or deny — computed against use-type, class and commercial posture.</div></div>
+
+      <div class="lstep" data-loop="3"><div class="ln">04</div><div class="lt">Lease, or nothing</div><div class="ld">An expiring handle with obligations. Killable mid-job. Never the permission itself.</div></div>
+
+      <div class="lstep" data-loop="4"><div class="ln">05</div><div class="lt">Receipt, both ways</div><div class="ld">Content-free. Refusals logged too — that is where the demand signal lives.</div></div>
+
+    </div>
+
+  </div>
+
+</section>
+
+ 
+
+<!-- ================= CONSOLE ================= -->
+
+<section class="blk" id="console">
+
+  <div class="wrap">
+
+    <div class="consolehead">
+
+      <div class="rv">
+
+        <div class="shead"><span class="snum">04</span><h2>The working console</h2></div>
+
+        <p class="sdek" style="margin-bottom:0">
+
+          Everything below is live. Change the policy on the left, resolve on the right, watch the answer change.
+
+        </p>
+
+      </div>
+
+    </div>
+
+ 
+
+    <div class="driver rv" id="driver">
+
+      <span class="lbl" id="driverLbl">Guided demo</span>
+
+      <span class="step" id="demostep">Press <b>Start</b> for the 90-second walkthrough — or just start clicking, nothing here can break.</span>
+
+      <span class="dots" id="dots"></span>
+
+      <button class="btn ghost" id="demoBtn">Start</button>
+
+      <button class="btn ghost" id="demoReset">Reset</button>
+
+    </div>
+
+ 
+
+    <div style="height:20px"></div>
+
+ 
+
+    <div class="cols">
+
+      <section class="panel rv" id="policyPanel" data-panel="policy">
+
+        <h2>1 · Passport <span class="n">standing policy</span></h2>
+
+        <div class="card">
+
+          <div class="cap">Egoist AI Passport</div>
+
+          <div class="nm">Juno Kade</div>
+
+          <div class="hd">@junokade · demo persona</div>
+
+          <div class="bio">Electronic producer bending broken rhythms and neon synths into late-night dance music. Based in Berlin, playing loud everywhere else.</div>
+
+          <div class="meta">
+
+            <div><span>Passport</span>ego:junokade</div>
+
+            <div><span>Works bound</span>41</div>
+
+            <div><span>Policy version</span>v7</div>
+
+          </div>
+
+        </div>
+
+        <div class="pad" style="border-bottom:1px solid var(--line)">
+
+          <div class="hint">
+
+            Policy lives on the Passport, not in the files. <b>RES / COM / IND / PLT</b> set which requester classes
+
+            each use-type is open to — click them.
+
+          </div>
+
+        </div>
+
+        <div id="policyBody"></div>
+
+        <div class="pad">
+
+          <div class="killrow">
+
+            <button class="btn danger" id="killAll">Global stop</button>
+
+            <button class="btn tiny" id="restore">Restore defaults</button>
+
+          </div>
+
+        </div>
+
+      </section>
+
+ 
+
+      <section class="panel rv" data-panel="resolver">
+
+        <h2>2 · Resolver <span class="n">proposed: passport.ego.ist/creative/resolve</span></h2>
+
+        <div class="pad">
+
+          <div class="hint" style="margin-bottom:12px">
+
+            The call a requester makes <em>at the moment it wants to act</em> — not when it crawled the work months ago.
+
+            <code>requester_class</code> is asserted by Egoist against a credential, never read from the request body,
+
+            or an ad agency would simply declare itself a research lab.
+
+          </div>
+
+          <div class="ctrls">
+
+            <div class="fld"><label>Requester</label><select id="requester"></select></div>
+
+            <div class="fld"><label>Requested use</label><select id="usetype"></select></div>
+
+            <div class="fld"><label>Commercial intent</label>
+
+              <select id="commercial"><option value="false">non-commercial</option><option value="true">commercial</option></select>
+
+            </div>
+
+            <div class="fld"><label>&nbsp;</label>
+
+              <button class="btn solid" id="resolveBtn" style="width:100%;padding:9px 14px">Resolve →</button>
+
+            </div>
+
+          </div>
+
+          <div class="decision d-idle" id="decision">
+
+            <div class="dh">
+
+              <div class="verdict" id="verdict">Awaiting request</div>
+
+              <div class="because" id="because">The resolver never sees the prompt, the output, or the asset. It sees who is asking, for what, under what terms.</div>
+
+            </div>
+
+            <pre class="json" id="jsonOut">// POST /creative/resolve
+
+// press Resolve to see the requester-facing response</pre>
+
+          </div>
+
+        </div>
+
+ 
+
+        <h2 style="border-top:1px solid var(--line-2)">3 · Live leases <span class="n" id="leaseCount">0 active</span></h2>
+
+        <div class="pad" data-panel="leases">
+
+          <div class="hint" style="margin-bottom:11px">
+
+            An allow does not hand over a licence — it mints a lease that dies on its own and must be re-verified
+
+            before each covered act. TTLs are compressed to <b>20 seconds</b> here so you can watch one expire.
+
+          </div>
+
+          <div id="leases"><div class="empty">No active leases.</div></div>
+
+        </div>
+
+      </section>
+
+ 
+
+      <div>
+
+        <section class="panel rv" style="margin-bottom:18px" data-panel="offers">
+
+          <h2>4 · Demand inbox <span class="n">refusals worth money</span></h2>
+
+          <div class="pad">
+
+            <div class="hint" style="margin-bottom:11px">
+
+              A creator who refuses today learns nothing and the demand evaporates. Here a commercial refusal
+
+              surfaces who wanted what, and lets her name a price instead of losing the deal in silence.
+
+            </div>
+
+            <div id="offers"><div class="empty">No offers yet. Refuse a commercial request to generate one.</div></div>
+
+          </div>
+
+        </section>
+
+ 
+
+        <section class="panel rv" data-panel="receipts">
+
+          <h2>5 · Receipts <span class="n">my.ego.ist/activity</span></h2>
+
+          <div class="pad">
+
+            <div class="hint" style="margin-bottom:9px">
+
+              Content-free, and asymmetric: the requester gets an opaque code, the creator gets the reason.
+
+              Returning the policy path would let anyone reconstruct the whole policy in eighteen calls.
+
+            </div>
+
+            <div id="receipts"><div class="empty">No activity yet.</div></div>
+
+          </div>
+
+        </section>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+ 
+
+<!-- ================= HONEST ================= -->
+
+<section class="blk" id="honest" style="border-bottom:none">
+
+  <div class="wrap">
+
+    <div class="shead rv"><span class="snum">05</span><h2>What it enforces, and what it only makes legible</h2></div>
+
+    <p class="sdek rv">The first question anyone serious will ask, answered before they have to ask it.</p>
+
+    <div class="cards3 rv">
+
+      <div class="ncard dark">
+
+        <h3>The honest limit</h3>
+
+        <p>Consent protocols are either <b>custody-based</b> — the intermediary holds the asset and can withhold it —
+
+        or <b>declaration-based</b>, holding nothing and instead making the permission state legible and non-repudiable.</p>
+
+        <p>This is declaration-based for public work, because the alternative means Egoist holding every creator's
+
+        catalogue: a concentration risk worse than the problem. <b>So a lease does not stop someone who already
+
+        scraped a track.</b> It changes what they can later claim — “the opt-out was ambiguous, we didn't know”
+
+        stops working when there was a machine-readable answer at a known address.</p>
+
+        <p>It <i>is</i> custody-based where custody exists — voice models, likeness reference, unreleased stems.
+
+        There the lease gates the actual bits. <b>And nothing here un-trains a model.</b> No consent layer can.</p>
+
+      </div>
+
+      <div class="ncard">
+
+        <h3>Why requesters adopt first</h3>
+
+        <p>“Why would a scraper voluntarily call your resolver?” It wouldn't.
+
+        <b>You don't convince the scraper — you convince the scraper's customer.</b></p>
+
+        <p>Agencies and brands buying creative-AI tools already demand indemnification, and vendors already compete
+
+        on licensed data. A vendor who can produce resolution receipts can sell into that market. One who can't,
+
+        increasingly can't. The receipt isn't a compliance chore — it's the artifact they show the client.</p>
+
+        <p>Which answers who pays: <b>requesters pay</b> for consent provenance they can put in a contract.
+
+        Creators pay nothing, matching the Passport's free-for-life promise.</p>
+
+      </div>
+
+      <div class="ncard">
+
+        <h3>Next to existing work</h3>
+
+        <p>The field is not empty and pretending otherwise would be the fastest way to lose credibility.
+
+        <b>IETF AI-preferences</b> is standardising vocabulary past the single bit. <b>RSL</b> attaches licensing
+
+        terms to content. <b>C2PA</b> carries data-mining assertions. <b>Cloudflare pay-per-crawl</b> puts a toll
+
+        booth in the network path.</p>
+
+        <p>All four are anchored to <b>content or origin</b> and read <b>once, at fetch</b>. Creative Pass is
+
+        anchored to a <b>person</b> and read <b>at use</b> — which is what makes withdrawal mean something and
+
+        per-requester answers possible. It composes with all four; the pointer can ride inside a C2PA assertion.</p>
+
+        <p><b>First version:</b> one voice or likeness platform with an enterprise sales problem, plus Egoist's
+
+        creator base onboarding at <code>ego.ist/i/you</code>. Not a standards coalition.</p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+ 
+
+<div class="wrap">
+
+  <footer>
+
+    <span>Ask First — Creative Pass · prototype for the AI Passport Ideathon</span>
+
+    <span>All state in-memory · nothing leaves this page</span>
+
+  </footer>
+
+</div>
+
+<div class="spacer" id="spacer" style="display:none"></div>
+
+ 
+
+<script>
+
+(function(){
+
+"use strict";
+
+ 
+
+var GROUPS = [
+
+  { id:'read',  label:'Reading',    note:'low risk · this is distribution' },
+
+  { id:'learn', label:'Learning',   note:'the training question' },
+
+  { id:'gen',   label:'Generating', note:'where the harm lands' }
+
+];
+
+ 
+
+/* label = the protocol name.  plain = what it means to a human, used in the
+
+   comparison grid so a first-time reader never has to decode an abbreviation. */
+
+var USES = [
+
+  { id:'index',         grp:'read',  label:'index',          plain:'Be findable',        desc:'Crawl and index the work so it can be found.' },
+
+  { id:'quote',         grp:'read',  label:'quote',          plain:'Quote a bit of me',  desc:'Reproduce a bounded excerpt with attribution.' },
+
+  { id:'retrieve',      grp:'read',  label:'retrieve',       plain:'Cite me live',       desc:'Pull into model context at inference time and cite.' },
+
+  { id:'train:general', grp:'learn', label:'train:general',  plain:'Train on my work',   desc:'Include in a general-purpose training corpus.' },
+
+  { id:'train:finetune',grp:'learn', label:'train:finetune', plain:'Train on only me',   desc:'Fine-tune a model specifically on this creator.' },
+
+  { id:'style',         grp:'gen',   label:'style-transfer', plain:'Copy my style',      desc:'Generate new work in this creator’s recognisable style.' },
+
+  { id:'remix',         grp:'gen',   label:'remix',          plain:'Remix my track',     desc:'Produce a derivative of a specific piece.' },
+
+  { id:'voice',         grp:'gen',   label:'voice-synth',    plain:'Clone my voice',     desc:'Synthesise this creator’s voice.', protected:true },
+
+  { id:'likeness',      grp:'gen',   label:'likeness',       plain:'Use my face',        desc:'Render this creator’s face, body or persona.', protected:true }
+
+];
+
+ 
+
+/* [ id, chip abbreviation, human name, one-line gloss ] */
+
+var CLASSES = [
+
+  ['research',   'RES', 'Research lab',  'a university or non-profit lab'],
+
+  ['commercial', 'COM', 'A company',     'someone selling the output'],
+
+  ['individual', 'IND', 'One person',    'a fan making something'],
+
+  ['platform',   'PLT', 'AI assistant',  'Claude, ChatGPT, Gemini']
+
+];
+
+ 
+
+/* protectedOk = cleared for protected-tier use-types (voice, likeness).
+
+   A separate, higher bar than mere registration — an audited principal, not just a known one. */
+
+var REQUESTERS = [
+
+  { id:'openmusic.research', label:'OpenMusic Lab (research)',       cls:'research',     verified:true,  protectedOk:false },
+
+  { id:'stemforge.ai',       label:'StemForge AI (commercial)',      cls:'commercial',   verified:true,  protectedOk:true  },
+
+  { id:'adhouse.agency',     label:'Adhouse Agency (commercial)',    cls:'commercial',   verified:true,  protectedOk:false },
+
+  { id:'claude.ai',          label:'Claude (assistant platform)',    cls:'platform',     verified:true,  protectedOk:false },
+
+  { id:'fan.remix.app',      label:'A fan, via Remix.app',           cls:'individual',   verified:true,  protectedOk:false },
+
+  { id:'unknown.crawler',    label:'unknown.crawler (unregistered)', cls:'unregistered', verified:false, protectedOk:false }
+
+];
+
+ 
+
+function defaultPolicy(){
+
+  return {
+
+    'index':          { mode:'allow', commercialOk:true,  attribution:false, classes:{research:1,commercial:1,individual:1,platform:1}, ttl:20 },
+
+    'quote':          { mode:'allow', commercialOk:true,  attribution:true,  classes:{research:1,commercial:1,individual:1,platform:1}, ttl:20 },
+
+    'retrieve':       { mode:'allow', commercialOk:true,  attribution:true,  classes:{research:1,commercial:1,individual:1,platform:1}, ttl:20 },
+
+    'train:general':  { mode:'ask',   commercialOk:false, attribution:true,  classes:{research:1,commercial:0,individual:0,platform:0}, ttl:20 },
+
+    'train:finetune': { mode:'deny',  commercialOk:false, attribution:true,  classes:{research:0,commercial:0,individual:0,platform:0}, ttl:20 },
+
+    'style':          { mode:'allow', commercialOk:false, attribution:true,  classes:{research:1,commercial:1,individual:1,platform:1}, ttl:20 },
+
+    'remix':          { mode:'ask',   commercialOk:false, attribution:true,  classes:{research:1,commercial:0,individual:1,platform:0}, ttl:20 },
+
+    'voice':          { mode:'deny',  commercialOk:false, attribution:true,  classes:{research:0,commercial:0,individual:0,platform:0}, ttl:20 },
+
+    'likeness':       { mode:'deny',  commercialOk:false, attribution:true,  classes:{research:0,commercial:0,individual:0,platform:0}, ttl:20 }
+
+  };
+
+}
+
+ 
+
+var policy = defaultPolicy(), leases = [], receipts = [], offers = [], proposals = [];
+
+ 
+
+var $ = function(s){ return document.querySelector(s); };
+
+function el(t,c,h){ var e=document.createElement(t); if(c)e.className=c; if(h!==undefined)e.innerHTML=h; return e; }
+
+function useById(id){ for(var i=0;i<USES.length;i++) if(USES[i].id===id) return USES[i]; }
+
+function reqById(id){ for(var i=0;i<REQUESTERS.length;i++) if(REQUESTERS[i].id===id) return REQUESTERS[i]; }
+
+function rid(p){ var s='abcdef0123456789', o=''; for(var i=0;i<8;i++) o+=s[Math.floor(Math.random()*16)]; return p+'_'+o; }
+
+function clock(){ return new Date().toISOString().replace('T',' ').slice(0,19)+'Z'; }
+
+function hhmmss(){ return new Date().toTimeString().slice(0,8); }
+
+ 
+
+/* ---------------- loop diagram ---------------- */
+
+var loopTimer = null;
+
+function runLoop(upto){
+
+  if(loopTimer) clearTimeout(loopTimer);
+
+  var nodes = document.querySelectorAll('.lstep');
+
+  for(var i=0;i<nodes.length;i++) nodes[i].classList.remove('hot');
+
+  var i2 = 0;
+
+  (function walk(){
+
+    for(var j=0;j<nodes.length;j++) nodes[j].classList.remove('hot');
+
+    if(i2 > upto){ return; }
+
+    if(nodes[i2]) nodes[i2].classList.add('hot');
+
+    i2++;
+
+    loopTimer = setTimeout(walk, 340);
+
+  })();
+
+}
+
+ 
+
+/* ---------------- policy UI ---------------- */
+
+function renderPolicy(){
+
+  var body = $('#policyBody'); body.innerHTML='';
+
+  GROUPS.forEach(function(g){
+
+    var wrap = el('div','grp');
+
+    wrap.appendChild(el('div','gh','<span>'+g.label+'</span><span>'+g.note+'</span>'));
+
+    USES.filter(function(u){ return u.grp===g.id; }).forEach(function(u){
+
+      var p = policy[u.id], row = el('div','row');
+
+      row.setAttribute('data-use', u.id);
+
+      var r1 = el('div','r1');
+
+      r1.appendChild(el('div',null,'<div class="ut">'+u.label+
+
+        '<span class="pn">· '+u.plain.toLowerCase()+'</span>'+
+
+        (u.protected?'<span class="prot">protected</span>':'')+'</div>'));
+
+      var seg = el('div','seg');
+
+      ['allow','ask','deny'].forEach(function(v){
+
+        var b = el('button', p.mode===v?'on':'', v==='ask'?'ask me':v);
+
+        b.setAttribute('data-v',v);
+
+        b.onclick = function(){
+
+          policy[u.id].mode = v; renderPolicy(); pulseRow(u.id);
+
+          logReceipt('rev','policy',u.label,'standing policy set to '+v.toUpperCase());
+
+          paintMatrix();
+
+        };
+
+        seg.appendChild(b);
+
+      });
+
+      r1.appendChild(seg); row.appendChild(r1);
+
+      row.appendChild(el('div','desc',u.desc));
+
+ 
+
+      var conds = el('div','conds');
+
+      [['commercialOk','commercial ok'],['attribution','attribution']].forEach(function(pair){
+
+        var lab = el('label','chk'), inp = document.createElement('input');
+
+        inp.type='checkbox'; inp.checked=!!p[pair[0]]; inp.disabled=(p.mode==='deny');
+
+        inp.onchange = function(){ policy[u.id][pair[0]] = inp.checked; renderPolicy(); };
+
+        lab.appendChild(inp); lab.appendChild(document.createTextNode(pair[1]));
+
+        conds.appendChild(lab);
+
+      });
+
+      var cw = el('div','classes'); cw.appendChild(el('span','lbl','open to'));
+
+      CLASSES.forEach(function(c){
+
+        var b = el('span','cl'+(p.classes[c[0]]?' on':''), c[1]);
+
+        b.title = c[0];
+
+        b.onclick = function(){
+
+          policy[u.id].classes[c[0]] = p.classes[c[0]] ? 0 : 1; renderPolicy(); pulseRow(u.id);
+
+          logReceipt('rev','policy',u.label,'requester class '+c[0]+' '+(policy[u.id].classes[c[0]]?'opened':'closed'));
+
+          paintMatrix();
+
+        };
+
+        cw.appendChild(b);
+
+      });
+
+      conds.appendChild(cw);
+
+      row.appendChild(conds);
+
+      wrap.appendChild(row);
+
+    });
+
+    body.appendChild(wrap);
+
+  });
+
+}
+
+function pulseRow(id){
+
+  var r = document.querySelector('.row[data-use="'+id+'"]');
+
+  if(!r) return;
+
+  r.classList.add('pulse');
+
+  setTimeout(function(){ r.classList.remove('pulse'); }, 700);
+
+}
+
+ 
+
+/* ---------------- comparison matrix ---------------- */
+
+function buildMatrix(){
+
+  var t = $('#matrix'); if(!t) return;
+
+  var head = '<tr><th class="rw corner"></th>';
+
+  CLASSES.forEach(function(c){ head += '<th class="hd">'+c[2]+'<small>'+c[3]+'</small></th>'; });
+
+  head += '</tr>';
+
+  var body = '';
+
+  GROUPS.forEach(function(g){
+
+    body += '<tr class="grp-row"><th colspan="5">'+g.label+' — '+g.note+'</th></tr>';
+
+    USES.filter(function(u){ return u.grp===g.id; }).forEach(function(u){
+
+      body += '<tr><th class="rw">'+u.plain+'</th>';
+
+      CLASSES.forEach(function(c){ body += '<td data-cell="'+u.id+'|'+c[0]+'"></td>'; });
+
+      body += '</tr>';
+
+    });
+
+  });
+
+  t.innerHTML = head + body;
+
+}
+
+function paintMatrix(animate){
+
+  var cells = document.querySelectorAll('#matrix td');
+
+  for(var i=0;i<cells.length;i++){
+
+    (function(cell,idx){
+
+      var parts = cell.getAttribute('data-cell').split('|');
+
+      var u = useById(parts[0]), p = policy[parts[0]];
+
+      var cname = '', cgloss = '';
+
+      for(var k=0;k<CLASSES.length;k++) if(CLASSES[k][0]===parts[1]){ cname = CLASSES[k][2]; cgloss = CLASSES[k][3]; }
+
+      var open = p.mode !== 'deny' && p.classes[parts[1]];
+
+      var cls = !open ? 'm-deny' : (p.mode==='ask' ? 'm-ask' : 'm-allow');
+
+      var txt = cls==='m-deny' ? 'no' : (cls==='m-ask' ? 'ask' : 'yes');
+
+      var verb = cls==='m-deny' ? 'is refused' : (cls==='m-ask' ? 'must ask her first' : 'is allowed automatically');
+
+      cell.className = cls + (animate ? '' : ' show');
+
+      cell.textContent = txt;
+
+      /* hover any square and it reads back as a sentence */
+
+      cell.title = cname + ' (' + cgloss + ') wanting to "' + u.plain.toLowerCase() + '" ' + verb + '.';
+
+      if(animate) setTimeout(function(){ cell.classList.add('show'); }, 20*idx);
+
+    })(cells[i], i);
+
+  }
+
+}
+
+ 
+
+/* ---------------- resolver ---------------- */
+
+function syntax(obj){
+
+  var j = JSON.stringify(obj,null,2).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+
+  j = j.replace(/"([^"]+)":/g,'"<span class="k">$1</span>":');
+
+  j = j.replace(/: "([^"]*)"/g,': "<span class="s">$1</span>"');
+
+  j = j.replace(/: (true|false|null|\d+)/g,': <span class="n">$1</span>');
+
+  return j;
+
+}
+
+ 
+
+function resolve(){
+
+  var r = reqById($('#requester').value), u = useById($('#usetype').value);
+
+  var commercial = $('#commercial').value === 'true';
+
+  var p = policy[u.id];
+
+  var decision, code, detail, why, offerable = false;
+
+ 
+
+  /* Unregistered callers never reach the decision engine. They get a transport-level
+
+     401 and an empty body — no passport confirmation, no decision, no receipt id.
+
+     Returning any of those would confirm the Passport exists, which is exactly what
+
+     404 passport_not_found is designed to conceal. */
+
+  if(!r.verified){
+
+    logReceipt('deny', r.label, u.label, 'unauthenticated caller rejected at the transport layer — request never reached the decision engine');
+
+    paintDecision('deny',
+
+      'Unregistered callers are rejected before any policy is evaluated, and the response body is empty — not even a confirmation that this Passport exists. Requester class is asserted by Egoist against a registered credential, never self-declared in the request body; otherwise an ad agency would simply claim to be a research lab.',
+
+      { error:'requester_not_registered', status:401,
+
+        detail:'no valid client credential presented',
+
+        register_at:'passport.ego.ist/creative/register' });
+
+    runLoop(1);
+
+    renderLeases();
+
+    return;
+
+  }
+
+ 
+
+  if(p.mode === 'deny'){
+
+    decision='deny'; code='refused_by_policy';
+
+    detail='policy.'+u.id+'.mode = deny';
+
+    why='Standing policy refuses this use outright. No lease, no reference material — the requester leaves with an opaque code, and the creator still learns they asked.';
+
+  } else if(!p.classes[r.cls]){
+
+    decision='deny'; code='refused_by_policy'; offerable = commercial;
+
+    detail='policy.'+u.id+'.classes.'+r.cls+' = false';
+
+    why='The use is open, but not to this class of requester. A research lab and an ad agency are not the same question, and this is the dimension every content-anchored standard collapses.';
+
+  } else if(u.protected && !r.protectedOk){
+
+    decision='deny'; code='refused_by_policy';
+
+    detail='protected tier: '+r.id+' is not cleared for protected-tier access';
+
+    why='Voice and likeness sit in the protected tier, which takes a higher bar than registration — the principal must be separately audited and cleared. Being a known company is not the same as being trusted with someone’s voice. Note this requester is registered and would pass on any non-protected use-type.';
+
+  } else if(p.mode === 'ask'){
+
+    decision='escalate'; code='pending_creator_review';
+
+    detail='policy.'+u.id+'.mode = ask';
+
+    why='Out of standing policy, so it lands in the Passport Inbox as a proposal. Repeat asks for the same use collapse into one item with a counter — a consent system that fires ten thousand notifications has not obtained consent, it has manufactured a reflex.';
+
+  } else if(commercial && !p.commercialOk){
+
+    decision='deny'; code='refused_by_policy'; offerable = true;
+
+    detail='policy.'+u.id+'.commercial_ok = false';
+
+    why='The use is permitted, the commerce is not. This is the refusal that becomes an offer — the creator sees the demand instead of losing it in silence.';
+
+  } else {
+
+    decision='allow'; code='granted';
+
+    detail='policy.'+u.id+'.mode = allow, class '+r.cls+' open';
+
+    why='A lease is minted with a hard expiry and attached obligations. The requester never receives the permission itself, only a handle that stops working.';
+
+  }
+
+ 
+
+  var out = {
+
+    resolver:'passport.ego.ist/creative/resolve',
+
+    passport:'ego:junokade',
+
+    requester:r.id,
+
+    requester_class:r.cls,
+
+    requester_auth:'client_credential:verified',
+
+    use:u.label,
+
+    commercial:commercial,
+
+    decision:decision,
+
+    code:code,
+
+    resolved_at:clock()
+
+  };
+
+ 
+
+  if(decision === 'allow'){
+
+    var L = { id:rid('lease'), use:u.label, requester:r.id, requesterLabel:r.label,
+
+              expires:Date.now()+p.ttl*1000, ttl:p.ttl, revoked:false, attribution:p.attribution };
+
+    leases.unshift(L);
+
+    out.lease = { id:L.id, expires_in_seconds:p.ttl,
+
+      obligations:(p.attribution?['attribute:@junokade']:[]).concat(['no-redistribute-reference','no-sublicense']),
+
+      reverify_before_each_use:true };
+
+    logReceipt('allow', r.label, u.label, detail+' — lease '+L.id+' issued for '+p.ttl+'s');
+
+  }
+
+ 
+
+  if(decision === 'deny'){
+
+    if(offerable){ out.terms_available = true; out.next = 'POST /creative/offer'; addOffer(r,u); }
+
+    logReceipt('deny', r.label, u.label, detail);
+
+  }
+
+ 
+
+  if(decision === 'escalate'){
+
+    var key = r.id+'|'+u.id+'|'+commercial, existing = null;
+
+    for(var i=0;i<proposals.length;i++) if(proposals[i].key===key) existing = proposals[i];
+
+    if(existing){ existing.n++; }
+
+    else { existing = { key:key, id:rid('prop'), n:1 }; proposals.unshift(existing); }
+
+    /* keyed on (requester, use-type, commercial posture) — a commercial and a
+
+       non-commercial ask are different questions and must not collapse together */
+
+    out.proposal = { id:existing.id, inbox:'passport_inbox', status:'pending_creator_review',
+
+                     duplicate_of: existing.n>1 ? existing.id : null, times_asked: existing.n };
+
+    out.note = 'No context released while pending. Silence is a denial, not a default yes.';
+
+    logReceipt('ask', r.label, u.label, existing.n>1
+
+      ? detail+' — folded into existing proposal '+existing.id+' (asked '+existing.n+'×, one inbox item)'
+
+      : detail+' — escalated to Passport Inbox as '+existing.id);
+
+  }
+
+ 
+
+  out.receipt = { id:rid('rcpt'), content_hash:null,
+
+                  note:'content-free: no prompt, output or asset recorded. Reason detail is written to the creator’s log only.' };
+
+ 
+
+  paintDecision(decision, why, out);
+
+  runLoop(decision==='allow' ? 4 : 4);
+
+  renderLeases();
+
+}
+
+ 
+
+function paintDecision(d, why, obj){
+
+  var box = $('#decision');
+
+  box.className = 'decision ' + (d==='allow'?'d-allow':d==='deny'?'d-deny':d==='escalate'?'d-ask':'d-idle');
+
+  $('#verdict').textContent = d==='escalate' ? 'Ask me' : d;
+
+  $('#because').textContent = why;
+
+  var status = obj.error ? '401 — rejected before policy evaluation' : '200 (requester-facing)';
+
+  $('#jsonOut').innerHTML = '<span class="c">// POST /creative/resolve → '+status+'</span>\n' + syntax(obj);
+
+}
+
+ 
+
+/* ---------------- leases ---------------- */
+
+function renderLeases(){
+
+  var box = $('#leases');
+
+  if(!leases.length){ box.innerHTML='<div class="empty">No active leases.</div>'; tick(); return; }
+
+  box.innerHTML='';
+
+  leases.slice(0,6).forEach(function(l){
+
+    var dead = l.revoked || l.expires<=Date.now();
+
+    var row = el('div','lease'+(dead?' dead':''));
+
+    row.appendChild(el('div',null,'<div class="lid">'+l.id+'</div><div class="lu">'+l.use+' → '+l.requester+(l.attribution?' · attribution required':'')+'</div>'));
+
+    var right = el('div',null); right.style.display='flex'; right.style.alignItems='center'; right.style.gap='10px';
+
+    var t = el('div','ttl'); t.setAttribute('data-lease', l.id); right.appendChild(t);
+
+    if(!dead){
+
+      var b = el('button','btn tiny danger','Kill');
+
+      b.onclick = function(){ l.revoked = true;
+
+        logReceipt('rev', l.requesterLabel, l.use, 'lease '+l.id+' revoked by creator — authority withdrawn mid-use');
+
+        renderLeases(); };
+
+      right.appendChild(b);
+
+    }
+
+    row.appendChild(right); box.appendChild(row);
+
+  });
+
+  tick();
+
+}
+
+ 
+
+function tick(){
+
+  var nodes = document.querySelectorAll('.ttl');
+
+  for(var i=0;i<nodes.length;i++){
+
+    var t = nodes[i], id = t.getAttribute('data-lease'), l = null;
+
+    for(var j=0;j<leases.length;j++) if(leases[j].id===id) l = leases[j];
+
+    if(!l) continue;
+
+    if(l.revoked){ t.innerHTML='<small>status</small>REVOKED'; t.className='ttl warn'; continue; }
+
+    var s = Math.max(0, Math.ceil((l.expires - Date.now())/1000));
+
+    if(s===0){ t.innerHTML='<small>status</small>EXPIRED'; t.className='ttl warn'; }
+
+    else { t.innerHTML='<small>expires in</small>'+s+'s'; t.className = s<=5 ? 'ttl warn' : 'ttl'; }
+
+  }
+
+  var live = leases.filter(function(l){ return !l.revoked && l.expires>Date.now(); });
+
+  $('#leaseCount').textContent = live.length + ' active';
+
+}
+
+setInterval(tick, 250);
+
+ 
+
+/* ---------------- receipts ---------------- */
+
+function logReceipt(kind, who, what, msg){
+
+  receipts.unshift({ kind:kind, who:who, what:what, msg:msg, t:hhmmss(), id:rid('rcpt') });
+
+  renderReceipts();
+
+}
+
+function renderReceipts(){
+
+  var box = $('#receipts');
+
+  if(!receipts.length){ box.innerHTML='<div class="empty">No activity yet.</div>'; return; }
+
+  box.innerHTML='';
+
+  receipts.slice(0,14).forEach(function(r){
+
+    var cls = r.kind==='allow'?'p-allow':r.kind==='deny'?'p-deny':r.kind==='ask'?'p-ask':'p-rev';
+
+    var row = el('div','rcpt');
+
+    row.appendChild(el('span','pill '+cls, r.kind==='rev'?'change':r.kind));
+
+    row.appendChild(el('div','rb','<div class="rt">'+r.t+' · '+r.id+'</div><div class="rm"><b>'+r.who+'</b> · '+r.what+'<br>'+r.msg+'</div>'));
+
+    box.appendChild(row);
+
+  });
+
+}
+
+ 
+
+/* ---------------- offers ---------------- */
+
+function addOffer(r,u){
+
+  for(var i=0;i<offers.length;i++) if(offers[i].req===r.id && offers[i].use===u.id && !offers[i].done) return;
+
+  offers.unshift({ id:rid('offer'), req:r.id, reqLabel:r.label, use:u.id, useLabel:u.label, done:false, price:null });
+
+  renderOffers();
+
+}
+
+function renderOffers(){
+
+  var box = $('#offers');
+
+  if(!offers.length){ box.innerHTML='<div class="empty">No offers yet. Refuse a commercial request to generate one.</div>'; return; }
+
+  box.innerHTML='';
+
+  offers.slice(0,5).forEach(function(o){
+
+    var d = el('div','offer');
+
+    if(o.done){
+
+      d.innerHTML = '<div class="ot"><b>'+o.reqLabel+'</b> wanted <b>'+o.useLabel+'</b>, commercial.<br>Terms sent: <b>'+o.price+'</b> — awaiting acceptance. Nothing released.</div>';
+
+    } else {
+
+      d.innerHTML = '<div class="ot"><b>'+o.reqLabel+'</b> wanted <b>'+o.useLabel+'</b> for commercial use and was refused by standing policy.<br>They walked away. Would you have said yes at a price?</div>';
+
+      var a = el('div','oa'), i = document.createElement('input');
+
+      i.type='text'; i.value='€2,400 / 12mo';
+
+      var b = el('button','btn tiny solid','Quote terms');
+
+      b.onclick = function(){ o.done=true; o.price=i.value||'—'; renderOffers();
+
+        logReceipt('rev', o.reqLabel, o.useLabel, 'creator quoted terms: '+o.price+' — offer open, no context released'); };
+
+      a.appendChild(i); a.appendChild(b); d.appendChild(a);
+
+    }
+
+    box.appendChild(d);
+
+  });
+
+}
+
+ 
+
+/* ---------------- init ---------------- */
+
+(function(){
+
+  var rs = $('#requester');
+
+  REQUESTERS.forEach(function(r){ var o=document.createElement('option'); o.value=r.id; o.textContent=r.label; rs.appendChild(o); });
+
+  var us = $('#usetype');
+
+  USES.forEach(function(u){ var o=document.createElement('option'); o.value=u.id; o.textContent=u.label; us.appendChild(o); });
+
+  rs.value='stemforge.ai'; us.value='style';
+
+})();
+
+ 
+
+$('#resolveBtn').onclick = resolve;
+
+ 
+
+$('#killAll').onclick = function(){
+
+  Object.keys(policy).forEach(function(k){ policy[k].mode='deny'; });
+
+  leases.forEach(function(l){ if(!l.revoked && l.expires>Date.now()) l.revoked = true; });
+
+  renderPolicy(); renderLeases(); paintMatrix();
+
+  logReceipt('rev','all requesters','every use-type','global stop — all standing permissions withdrawn, all live leases killed');
+
+};
+
+$('#restore').onclick = function(){
+
+  policy = defaultPolicy();
+
+  leases.forEach(function(l){ if(!l.revoked && l.expires>Date.now()) l.revoked = true; });
+
+  renderPolicy(); renderLeases(); paintMatrix();
+
+  logReceipt('rev','policy','all','standing policy reset to defaults — live leases killed, since they were issued under superseded terms');
+
+};
+
+ 
+
+/* ---------------- guided demo ---------------- */
+
+var SCRIPT = [
+
+  { focus:'resolver',
+
+    msg:'<b>1.</b> StemForge AI wants to generate a track in Juno’s style, non-commercially. Policy allows that class and that use — <i>a lease is minted with a live countdown.</i>',
+
+    run:function(){ set('stemforge.ai','style','false'); resolve(); } },
+
+  { focus:'offers',
+
+    msg:'<b>2.</b> Same company, same use, now for an ad campaign. The use is fine; the commerce is not. Refused — and <i>the refusal becomes a priced offer.</i>',
+
+    run:function(){ set('stemforge.ai','style','true'); resolve(); } },
+
+  { focus:'resolver',
+
+    msg:'<b>3 — the dimension every content-anchored standard collapses.</b> A research lab asks to train on her catalogue, commercially. It escalates to her Inbox rather than being auto-refused: <i>a condition may qualify an allow, but must never silently kill a request she asked to review.</i>',
+
+    run:function(){ set('openmusic.research','train:general','true'); resolve(); } },
+
+  { focus:'resolver',
+
+    msg:'<b>4.</b> Adhouse Agency asks for the identical thing. Different class, different answer — refused outright, and it never reaches her Inbox. <i>Who is asking is part of the policy.</i>',
+
+    run:function(){ set('adhouse.agency','train:general','false'); resolve(); } },
+
+  { focus:'resolver',
+
+    msg:'<b>5 — the protected tier.</b> Adhouse asks to clone her voice. Registered, but not <i>cleared</i>: voice and likeness take a higher bar than being a known company.',
+
+    run:function(){ set('adhouse.agency','voice','true'); resolve(); } },
+
+  { focus:'resolver',
+
+    msg:'<b>6.</b> An unregistered crawler tries. Rejected at the transport layer with an empty body — <i>not even a confirmation that this Passport exists.</i>',
+
+    run:function(){ set('unknown.crawler','index','false'); resolve(); } },
+
+  { focus:'policy',
+
+    msg:'<b>7 — the point.</b> Juno changes her mind about style-transfer. Flip <b>style-transfer</b> to <b>deny</b> on the left, then press Next.',
+
+    run:function(){} },
+
+  { focus:'resolver',
+
+    msg:'<b>8.</b> The identical request from step 1 now resolves to DENY — and <i>the policy change itself is in the receipt log</i>, because a consent system whose own edits are unaudited is not one.',
+
+    run:function(){ policy['style'].mode='deny'; renderPolicy(); paintMatrix();
+
+      logReceipt('rev','policy','style-transfer','standing policy set to DENY');
+
+      set('stemforge.ai','style','false'); resolve(); } },
+
+  { focus:null,
+
+    msg:'<b>Done.</b> Standing policy per use-type <i>and</i> per requester class, a protected tier above registration, use-time resolution, expiring leases, asymmetric content-free receipts, and a market where refusal used to be a dead end. Keep clicking — nothing here can break.',
+
+    run:function(){} }
+
+];
+
+function set(r,u,c){ $('#requester').value=r; $('#usetype').value=u; $('#commercial').value=c; }
+
+ 
+
+function buildDots(){
+
+  var d = $('#dots'); if(!d) return;
+
+  d.innerHTML='';
+
+  for(var i=0;i<SCRIPT.length;i++) d.appendChild(el('i'));
+
+}
+
+function paintDots(n){
+
+  var ds = document.querySelectorAll('#dots i');
+
+  for(var i=0;i<ds.length;i++){
+
+    ds[i].className = i===n ? 'on' : (i<n ? 'done' : '');
+
+  }
+
+}
+
+function clearFocus(){
+
+  var ps = document.querySelectorAll('.panel[data-panel]');
+
+  for(var i=0;i<ps.length;i++){ ps[i].classList.remove('spot'); ps[i].classList.remove('zoom'); }
+
+  var cols = document.querySelector('.cols');
+
+  if(cols) cols.classList.remove('dim');
+
+}
+
+/* Phase 1 of a demo step: lift the panel that is about to change and push
+
+   everything else back, so the eye arrives before the state does. */
+
+function zoomTo(name){
+
+  clearFocus();
+
+  if(!name) return null;
+
+  var t = document.querySelector('.panel[data-panel="'+name+'"]');
+
+  if(!t) return null;
+
+  var cols = document.querySelector('.cols');
+
+  if(cols) cols.classList.add('dim');
+
+  t.classList.add('zoom');
+
+  keepInView(t);
+
+  return t;
+
+}
+
+/* Phase 3: settle back to a normal spotlight so the JSON stays readable. */
+
+function settleTo(name){
+
+  var cols = document.querySelector('.cols');
+
+  if(cols) cols.classList.remove('dim');
+
+  var ps = document.querySelectorAll('.panel[data-panel]');
+
+  for(var i=0;i<ps.length;i++) ps[i].classList.remove('zoom');
+
+  if(!name) return;
+
+  var t = document.querySelector('.panel[data-panel="'+name+'"]');
+
+  if(t) t.classList.add('spot');
+
+}
+
+function spotlight(name){ clearFocus(); settleTo(name); }
+
+ 
+
+/* Bring the panel under discussion into view, but only when it genuinely is not.
+
+   Scrolling on every step would fight the reader; never scrolling means a step
+
+   can point at something sitting below the fold. The driver is fixed to the
+
+   bottom of the screen, so we reserve room for it when measuring. */
+
+function keepInView(node){
+
+  var t = node || document.getElementById('console');
+
+  if(!t || !t.getBoundingClientRect || !t.scrollIntoView) return;
+
+  var vh = window.innerHeight || 0;
+
+  if(!vh) return;
+
+  var driverH = 96, topH = 58;
+
+  var r = t.getBoundingClientRect();
+
+  var top = Math.max(r.top, topH);
+
+  var bottom = Math.min(r.bottom, vh - driverH);
+
+  var visible = bottom - top;
+
+  var wanted = Math.min(r.height, vh - driverH - topH);
+
+  if(wanted <= 0) return;
+
+  if(visible / wanted < 0.66){
+
+    t.scrollIntoView({ behavior:'smooth', block: r.height > (vh - driverH - topH) ? 'start' : 'center' });
+
+  }
+
+}
+
+ 
+
+var step = -1, busy = false;
+
+var ZOOM_MS = 620;   /* how long the panel sits lifted before anything changes */
+
+ 
+
+function advance(){
+
+  if(busy) return;
+
+  step++;
+
+  if(step >= SCRIPT.length){ step = SCRIPT.length-1; return; }
+
+  var s = SCRIPT[step];
+
+ 
+
+  /* Phase 1 — narrate and zoom. Nothing has happened yet. */
+
+  $('#demostep').innerHTML = s.msg;
+
+  $('#driverLbl').textContent = 'Step ' + (step+1) + ' / ' + SCRIPT.length;
+
+  paintDots(step);
+
+  $('#driver').classList.add('live');
+
+  $('#spacer').style.display = 'block';
+
+  zoomTo(s.focus);
+
+ 
+
+  busy = true;
+
+  $('#demoBtn').disabled = true;
+
+ 
+
+  /* Phase 2 — the change lands, on a panel the eye is already resting on. */
+
+  setTimeout(function(){
+
+    s.run();
+
+    settleTo(s.focus);
+
+    busy = false;
+
+    $('#demoBtn').textContent = step >= SCRIPT.length-1 ? 'Finished' : 'Next →';
+
+    $('#demoBtn').disabled = step >= SCRIPT.length-1;
+
+  }, ZOOM_MS);
+
+}
+
+$('#demoBtn').onclick = advance;
+
+$('#demoReset').onclick = function(){
+
+  step = -1; busy = false; policy = defaultPolicy(); leases = []; receipts = []; offers = []; proposals = [];
+
+  renderPolicy(); renderLeases(); renderReceipts(); renderOffers(); paintMatrix(); clearFocus(); paintDots(-1);
+
+  $('#driver').classList.remove('live');
+
+  $('#spacer').style.display = 'none';
+
+  $('#driverLbl').textContent = 'Guided demo';
+
+  $('#demoBtn').textContent = 'Start'; $('#demoBtn').disabled = false;
+
+  $('#demostep').innerHTML = 'Press <b>Start</b> for the 90-second walkthrough — or just start clicking, nothing here can break.';
+
+  $('#decision').className = 'decision d-idle';
+
+  $('#verdict').textContent = 'Awaiting request';
+
+  $('#because').textContent = 'The resolver never sees the prompt, the output, or the asset. It sees who is asking, for what, under what terms.';
+
+  $('#jsonOut').innerHTML = '<span class="c">// POST /creative/resolve</span>\n<span class="c">// press Resolve to see the requester-facing response</span>';
+
+  var nodes = document.querySelectorAll('.lstep');
+
+  for(var i=0;i<nodes.length;i++) nodes[i].classList.remove('hot');
+
+};
+
+ 
+
+function jumpAndRun(){
+
+  var c = document.getElementById('console');
+
+  if(c && c.scrollIntoView) c.scrollIntoView({behavior:'smooth',block:'start'});
+
+  setTimeout(function(){ if(step < 0) advance(); }, 560);
+
+}
+
+$('#heroRun').onclick = jumpAndRun;
+
+$('#navRun').onclick  = jumpAndRun;
+
+ 
+
+/* ---------------- scroll reveal + one-bit toggle ---------------- */
+
+(function(){
+
+  var els = document.querySelectorAll('.rv');
+
+  if(!('IntersectionObserver' in window)){
+
+    for(var i=0;i<els.length;i++) els[i].classList.add('in');
+
+    paintMatrix(); return;
+
+  }
+
+  var io = new IntersectionObserver(function(entries){
+
+    entries.forEach(function(e){
+
+      if(!e.isIntersecting) return;
+
+      e.target.classList.add('in');
+
+      io.unobserve(e.target);
+
+      if(e.target.classList.contains('vs')) paintMatrix(true);
+
+    });
+
+  }, { threshold:.14, rootMargin:'0px 0px -40px 0px' });
+
+  for(var j=0;j<els.length;j++) io.observe(els[j]);
+
+})();
+
+ 
+
+/* the lonely single bit, flipping back and forth, deciding everything */
+
+setInterval(function(){
+
+  var s = document.getElementById('swx');
+
+  if(s) s.classList.toggle('on');
+
+}, 2600);
+
+ 
+
+buildMatrix(); paintMatrix();
+
+buildDots(); renderPolicy(); renderLeases(); renderReceipts(); renderOffers();
+
+})();
+
+</script>
+
+</body>
+
+</html>
