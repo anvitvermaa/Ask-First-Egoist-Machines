@@ -32,17 +32,11 @@ This document covers mechanism: wire formats, decision order, enforcement model,
  
 
 | Non-goal | Why |
-
 |---|---|
-
 | Un-training a model | Not achievable by any consent layer. Weights that absorbed a work are not reachable by a revocation. |
-
 | Physically preventing use of already-public work | See §3. This protocol is declaration-based for public work and custody-based only for non-public reference material. Conflating the two is the most common way this class of system oversells itself. |
-
 | Detecting infringement | Not a content-matching or watermarking system. Composes with those; does not replace them. |
-
 | Adjudicating ownership | Records claims and decisions. Does not decide who owns what. |
-
 | **Being a corpus host** | Egoist must never hold the creative works themselves. Holding permissions is defensible; holding everyone's unreleased catalogue is a liability that dwarfs the problem being solved. |
 
  
@@ -64,15 +58,10 @@ The field is not empty. Anything claiming otherwise should be distrusted.
  
 
 | Existing work | What it does | Where it stops |
-
 |---|---|---|
-
 | IETF AI-preferences | Standardising vocabulary beyond a single crawler bit | Expressed in a file at an origin; read at fetch; no withdrawal channel |
-
 | RSL | Machine-readable licensing terms attached to content | Anchored to the content, not the person; static once published |
-
 | C2PA / content credentials | Provenance, plus data-mining assertions | Backward-looking: establishes origin, not forward permission; travels in metadata that gets stripped |
-
 | Cloudflare pay-per-crawl | A toll booth in the network path | Gates fetch, not use; only works for content behind that network |
 
  
@@ -578,21 +567,13 @@ Transport errors and decisions are strictly separate. A decision always returns 
  
 
 | Status | Meaning |
-
 |---|---|
-
 | `200` + `decision:"escalate"` | Unknown use-type falls through to `default_unknown`. An unrecognised use is escalated, never errored — a 4xx invites the caller to proceed as if unanswered |
-
 | `401 requester_not_registered` | No valid credential. Empty body (§4) |
-
 | `403 no_pointer` | Work not bound to a Passport |
-
 | `404 passport_not_found` | No such Passport, or not published |
-
 | `409 lease_revoked` | Lease killed |
-
 | `410 lease_expired` | TTL elapsed |
-
 | `429 probe_limit` | Enumeration defence (§11) |
 
  
